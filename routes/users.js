@@ -23,18 +23,10 @@ router.post('/login', (req, res, next) => {
     const userFound = User.find(req.body.userLogin);
     console.log("User found" + JSON.stringify(userFound));
     if (userFound) {
-        if (userFound.active == false) {
-            req.session.errors = "Compte désactivé";
-            res.redirect('/users');
-        }
-        else {
-            ifUserActiveManagement(req, userFound, res);
-        }
+        userGestion(userFound, req, res);
     }
     else {
-        console.log("bad user");
-        req.session.errors = "Utilisateur inconnu";
-        res.redirect('/users');
+        ifWrongUser(req, res);
     }
 });
 
@@ -80,6 +72,26 @@ router.post('/add', (req, res, next) => {
 });
 
 module.exports = router;
+
+function ifWrongUser(req, res) {
+    console.log("bad user");
+    req.session.errors = "Utilisateur inconnu";
+    res.redirect('/users');
+}
+
+function userGestion(userFound, req, res) {
+    if (userFound.active == false) {
+        ifUserNotActive(req, res);
+    }
+    else {
+        ifUserActiveManagement(req, userFound, res);
+    }
+}
+
+function ifUserNotActive(req, res) {
+    req.session.errors = "Compte désactivé";
+    res.redirect('/users');
+}
 
 function ifUserActiveManagement(req, userFound, res) {
     if (bcrypt.compareSync(req.body.userPassword, userFound.password)) {
