@@ -32,7 +32,18 @@ router.post('/add', upload.single('imageExoplanet'), function (req, res, next) {
     console.log("POST ADD EXOPLANET");
     // validate name of explanet -> betweeen 3 and 100 character
     if (validator.isLength(req.body.uniqueNameExoplanet, { min: 3, max: 100 })) {
-        modifA(req, res);
+        console.log("req.file : " + JSON.stringify(req.file));
+        let filename = null;
+        // req.file must be undefined if no file given
+        if (req.file === undefined) filename = null;
+        else filename = 'images/' + req.file.filename;
+        Exoplanet.save({
+            uniqueName: req.body.uniqueNameExoplanet,
+            hClass: req.body.hClassExoplanet,
+            discoveryYear: req.body.discoveryYearExoplanet,
+            image: filename
+        });
+        res.redirect('/exoplanets');
     }
     else {
         res.redirect('/exoplanets?errors= Le nom d\'une exoplanète doit faire entre 3 et 100 caractères');
@@ -116,18 +127,3 @@ router.post('/update', function (req, res, next) {
 
 
 module.exports = router;
-function modifA(req, res) {
-    console.log("req.file : " + JSON.stringify(req.file));
-    let filename = null;
-    // req.file must be undefined if no file given
-    if (req.file === undefined) filename = null;
-    else filename = 'images/' + req.file.filename;
-    Exoplanet.save({
-        uniqueName: req.body.uniqueNameExoplanet,
-        hClass: req.body.hClassExoplanet,
-        discoveryYear: req.body.discoveryYearExoplanet,
-        image: filename
-    });
-    res.redirect('/exoplanets');
-}
-
